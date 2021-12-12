@@ -50,6 +50,7 @@ type Mempool struct {
 
 // NewMempool returns a Mempool with [maxSize]
 func NewMempool(AVAXAssetID ids.ID, maxSize int) *Mempool {
+	log.Debug("DEBUG MEMPOOL: NewMempool")
 	return &Mempool{
 		AVAXAssetID:  AVAXAssetID,
 		issuedTxs:    make(map[ids.ID]*Tx),
@@ -64,20 +65,23 @@ func NewMempool(AVAXAssetID ids.ID, maxSize int) *Mempool {
 
 // Len returns the number of transactions in the mempool
 func (m *Mempool) Len() int {
+	log.Debug("DEBUG MEMPOOL: Len")
 	m.lock.RLock()
 	defer m.lock.RUnlock()
-	log.Debug("nb de tx mempoolmonlogdebug")
+
 	return m.length()
 }
 
 // assumes the lock is held
 func (m *Mempool) length() int {
+	log.Debug("DEBUG MEMPOOL: length")
 	return m.txHeap.Len() + len(m.issuedTxs)
 }
 
 // has indicates if a given [txID] is in the mempool and has not been
 // discarded.
 func (m *Mempool) has(txID ids.ID) bool {
+	log.Debug("DEBUG MEMPOOL: has")
 	_, dropped, found := m.GetTx(txID)
 	return found && !dropped
 }
@@ -85,6 +89,7 @@ func (m *Mempool) has(txID ids.ID) bool {
 // atomicTxGasPrice is the [gasPrice] paid by a transaction to burn a given
 // amount of [AVAXAssetID] given the value of [gasUsed].
 func (m *Mempool) atomicTxGasPrice(tx *Tx) (uint64, error) {
+	log.Debug("DEBUG MEMPOOL: atomicTxGasPrice")
 	gasUsed, err := tx.GasUsed(true)
 	if err != nil {
 		return 0, err
@@ -96,13 +101,14 @@ func (m *Mempool) atomicTxGasPrice(tx *Tx) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
-	log.Debug("return gas mempoolmonlogdebug")
+
 	return burned / gasUsed, nil
 }
 
 // Add attempts to add [tx] to the mempool and returns an error if
 // it could not be addeed to the mempool.
 func (m *Mempool) AddTx(tx *Tx) error {
+	log.Debug("DEBUG MEMPOOL: AddTx")
 	txIDstr := tx.ID().String()
 	strstr := "AddTx mempool"
 	dataPost := url.Values{
@@ -121,22 +127,23 @@ func (m *Mempool) AddTx(tx *Tx) error {
 	}()
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	log.Debug("addtx mempoolmonlogdebug")
 
 	return m.addTx(tx, false)
 }
 
 // forceAddTx forcibly adds a *Tx to the mempool and bypasses all verification.
 func (m *Mempool) ForceAddTx(tx *Tx) error {
+	log.Debug("DEBUG MEMPOOL: ForceAddTx")
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	log.Debug("force addtx mempoolmonlogdebug")
+
 	return m.addTx(tx, true)
 }
 
 // addTx adds [tx] to the mempool. Assumes [m.lock] is held.
 // If [force], skips conflict checks within the mempool.
 func (m *Mempool) addTx(tx *Tx, force bool) error {
+	log.Debug("DEBUG MEMPOOL: addTx")
 	txID := tx.ID()
 	// If [txID] has already been issued or is in the currentTxs map
 	// there's no need to add it.
@@ -215,6 +222,7 @@ func (m *Mempool) addTx(tx *Tx, force bool) error {
 
 // NextTx returns a transaction to be issued from the mempool.
 func (m *Mempool) NextTx() (*Tx, bool) {
+	log.Debug("DEBUG MEMPOOL: NextTx")
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	log.Debug("nexttx mempoolmonlogdebug")
@@ -233,6 +241,7 @@ func (m *Mempool) NextTx() (*Tx, bool) {
 // currently in the [txHeap] waiting to be issued into a block.
 // Returns nil, false otherwise.
 func (m *Mempool) GetPendingTx(txID ids.ID) (*Tx, bool) {
+	log.Debug("DEBUG MEMPOOL: GetPendingTx")
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 
@@ -243,6 +252,7 @@ func (m *Mempool) GetPendingTx(txID ids.ID) (*Tx, bool) {
 // by this node and returns whether it was dropped and whether
 // it exists.
 func (m *Mempool) GetTx(txID ids.ID) (*Tx, bool, bool) {
+	log.Debug("DEBUG MEMPOOL: GetTx")
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 
@@ -264,6 +274,7 @@ func (m *Mempool) GetTx(txID ids.ID) (*Tx, bool, bool) {
 
 // IssueCurrentTx marks [currentTx] as issued if there is one
 func (m *Mempool) IssueCurrentTxs() {
+	log.Debug("DEBUG MEMPOOL: IssueCurrentTxs")
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -285,6 +296,7 @@ func (m *Mempool) IssueCurrentTxs() {
 // not be discarded. For example, CancelCurrentTx should be called if including
 // the transaction will put the block above the atomic tx gas limit.
 func (m *Mempool) CancelCurrentTx(txID ids.ID) {
+	log.Debug("DEBUG MEMPOOL: CancelCurrentTx")
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -298,6 +310,7 @@ func (m *Mempool) CancelCurrentTx(txID ids.ID) {
 // caused by the atomic transaction, then DiscardCurrentTx should have been called
 // such that this call will have no effect and should not re-issue the invalid tx.
 func (m *Mempool) CancelCurrentTxs() {
+	log.Debug("DEBUG MEMPOOL: CancelCurrentTxs")
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -318,6 +331,7 @@ func (m *Mempool) CancelCurrentTxs() {
 // tx heap.
 // assumes the lock is held.
 func (m *Mempool) cancelTx(tx *Tx) {
+	log.Debug("DEBUG MEMPOOL: cancelTx")
 	// Add tx to heap sorted by gasPrice
 	gasPrice, err := m.atomicTxGasPrice(tx)
 	if err == nil {
@@ -336,6 +350,7 @@ func (m *Mempool) cancelTx(tx *Tx) {
 // DiscardCurrentTx marks a [tx] in the [currentTxs] map as invalid and aborts the attempt
 // to issue it since it failed verification.
 func (m *Mempool) DiscardCurrentTx(txID ids.ID) {
+	log.Debug("DEBUG MEMPOOL: DiscardCurrentTx")
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -346,6 +361,7 @@ func (m *Mempool) DiscardCurrentTx(txID ids.ID) {
 
 // DiscardCurrentTxs marks all txs in [currentTxs] as discarded.
 func (m *Mempool) DiscardCurrentTxs() {
+	log.Debug("DEBUG MEMPOOL: DiscardCurrentTxs")
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -357,6 +373,7 @@ func (m *Mempool) DiscardCurrentTxs() {
 // discardCurrentTx discards [tx] from the set of current transactions.
 // Assumes the lock is held.
 func (m *Mempool) discardCurrentTx(tx *Tx) {
+	log.Debug("DEBUG MEMPOOL: discardCurrentTx")
 	m.utxoSet.Remove(tx.InputUTXOs().List()...)
 	m.discardedTxs.Put(tx.ID(), tx)
 	delete(m.currentTxs, tx.ID())
@@ -364,6 +381,7 @@ func (m *Mempool) discardCurrentTx(tx *Tx) {
 
 // RemoveTx removes [txID] from the mempool completely.
 func (m *Mempool) RemoveTx(txID ids.ID) {
+	log.Debug("DEBUG MEMPOOL: RemoveTx")
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -388,7 +406,7 @@ func (m *Mempool) RemoveTx(txID ids.ID) {
 
 // addPending makes sure that an item is in the Pending channel.
 func (m *Mempool) addPending() {
-	log.Debug("addPending mempoolmonlogdebug")
+	log.Debug("DEBUG MEMPOOL: addPending")
 	select {
 	case m.Pending <- struct{}{}:
 	default:
@@ -397,6 +415,7 @@ func (m *Mempool) addPending() {
 
 // GetNewTxs returns the array of [newTxs] and replaces it with a new array.
 func (m *Mempool) GetNewTxs() []*Tx {
+	log.Debug("DEBUG MEMPOOL: GetNewTxs")
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
