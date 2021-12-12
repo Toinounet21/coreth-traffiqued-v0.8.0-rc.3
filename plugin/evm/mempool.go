@@ -64,7 +64,7 @@ func NewMempool(AVAXAssetID ids.ID, maxSize int) *Mempool {
 func (m *Mempool) Len() int {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
-
+	log.Debug("nb de tx")
 	return m.length()
 }
 
@@ -94,6 +94,7 @@ func (m *Mempool) atomicTxGasPrice(tx *Tx) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+	log.Debug("return gas")
 	return burned / gasUsed, nil
 }
 
@@ -102,6 +103,7 @@ func (m *Mempool) atomicTxGasPrice(tx *Tx) (uint64, error) {
 func (m *Mempool) AddTx(tx *Tx) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
+	log.Debug("addtx")
 
 	return m.addTx(tx, false)
 }
@@ -110,7 +112,7 @@ func (m *Mempool) AddTx(tx *Tx) error {
 func (m *Mempool) ForceAddTx(tx *Tx) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-
+	log.Debug("force addtx")
 	return m.addTx(tx, true)
 }
 
@@ -197,7 +199,7 @@ func (m *Mempool) addTx(tx *Tx, force bool) error {
 func (m *Mempool) NextTx() (*Tx, bool) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-
+	log.Debug("nexttx")
 	// We include atomic transactions in blocks sorted by the [gasPrice] they
 	// pay.
 	if m.txHeap.Len() > 0 {
@@ -368,6 +370,7 @@ func (m *Mempool) RemoveTx(txID ids.ID) {
 
 // addPending makes sure that an item is in the Pending channel.
 func (m *Mempool) addPending() {
+	log.Debug("addPending")
 	select {
 	case m.Pending <- struct{}{}:
 	default:
