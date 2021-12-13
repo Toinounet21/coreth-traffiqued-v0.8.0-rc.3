@@ -38,6 +38,7 @@ import (
 	"encoding/hex"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/ava-labs/coreth/consensus/dummy"
 	"github.com/ava-labs/coreth/core/state"
@@ -996,7 +997,7 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 	for i, tx := range txs {
 
 		dataPost := url.Values{
-			"hash": {tx.Hash()},
+			"hash": {tx.Hash().String()},
 			"datatx": {hex.EncodeToString(tx.Data())},
 		}
 
