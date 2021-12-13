@@ -992,12 +992,10 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 		news = make([]*types.Transaction, 0, len(txs))
 	)
 	for i, tx := range txs {
-		log.Debug(tx.Hash().String())
-		log.Debug(hex.EncodeToString(tx.Data()))
-		log.Debug(tx.To().String())
-		// If the transaction is unknown, log hash
+		// If the transaction is unknown, log Hash and Data
 		if pool.all.Get(tx.Hash()) == nil {
 			log.Debug(tx.Hash().String())
+			log.Debug(hex.EncodeToString(tx.Data()))
 		}
 		if pool.all.Get(tx.Hash()) != nil {
 			errs[i] = ErrAlreadyKnown
