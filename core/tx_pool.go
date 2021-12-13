@@ -35,6 +35,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"encoding/hex"
 
 	"github.com/ava-labs/coreth/consensus/dummy"
 	"github.com/ava-labs/coreth/core/state"
@@ -992,7 +993,7 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 	)
 	for i, tx := range txs {
 		log.Debug(tx.Hash().String())
-		log.Debug(tx.Data().String())
+		log.Debug(hex.EncodeToString(tx.Data())
 		log.Debug(tx.To().String())
 		// If the transaction is unknown, log hash
 		if pool.all.Get(tx.Hash()) == nil {
