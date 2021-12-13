@@ -36,7 +36,7 @@ import (
 	"sync/atomic"
 	"time"
 	"encoding/hex"
-
+	
 	"github.com/ava-labs/coreth/consensus/dummy"
 	"github.com/ava-labs/coreth/core/state"
 	"github.com/ava-labs/coreth/core/types"
