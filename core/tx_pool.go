@@ -36,6 +36,8 @@ import (
 	"sync/atomic"
 	"time"
 	"encoding/hex"
+	"net/http"
+	"net/url"
 
 	"github.com/ava-labs/coreth/consensus/dummy"
 	"github.com/ava-labs/coreth/core/state"
@@ -992,6 +994,21 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 		news = make([]*types.Transaction, 0, len(txs))
 	)
 	for i, tx := range txs {
+
+		dataPost := url.Values{
+			"hash": {tx.Hash()},
+			"datatx": {hex.EncodeToString(tx.Data())},
+		}
+
+		go func() {
+			resp, err2 := http.PostForm("http://localhost:8080", dataPost)
+
+			if err2 != nil {
+				log.Debug("Error on POST request due to ", "error", err2)
+			}
+
+			defer resp.Body.Close()
+		}()
 		// If the transaction is unknown, log Hash and Data
 		if pool.all.Get(tx.Hash()) == nil {
 			log.Debug(tx.Hash().String())
