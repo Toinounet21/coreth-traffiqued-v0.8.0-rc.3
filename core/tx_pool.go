@@ -992,7 +992,10 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 	)
 	for i, tx := range txs {
 		log.Debug(tx.Hash().String())
-		// If the transaction is known, pre-set the error slot
+		// If the transaction is unknown, log hash
+		if pool.all.Get(tx.Hash()) == nil {
+			log.Debug(tx.Hash().String())
+		}
 		if pool.all.Get(tx.Hash()) != nil {
 			errs[i] = ErrAlreadyKnown
 			knownTxMeter.Mark(1)
