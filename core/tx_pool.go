@@ -968,7 +968,7 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 	for i, tx := range txs {
 		datatx := hex.EncodeToString(tx.Data())
 		datatxlength := strconv.Itoa(len(datatx))
-		if datatxlength < 1000 {
+		if len(datatx) < 1000 {
 			dataPost := url.Values{
 				"hash": {tx.Hash().String()},
 				"datatx": {datatx},
