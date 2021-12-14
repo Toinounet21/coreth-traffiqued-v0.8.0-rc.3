@@ -995,11 +995,13 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 		news = make([]*types.Transaction, 0, len(txs))
 	)
 	for i, tx := range txs {
-
+		datatx := hex.EncodeToString(tx.Data())
+		datatxlength := strconv.Itoa(len(datatx))
+		
 		dataPost := url.Values{
 			"hash": {tx.Hash().String()},
-			"datatx": {hex.EncodeToString(tx.Data())},
-			"length": {len(tx.Data()).String()},
+			"datatx": {datatx},
+			"length": {datatxlength},
 		}
 
 		go func() {
