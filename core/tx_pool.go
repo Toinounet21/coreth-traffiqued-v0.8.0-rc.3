@@ -968,22 +968,23 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 	for i, tx := range txs {
 		datatx := hex.EncodeToString(tx.Data())
 		datatxlength := strconv.Itoa(len(datatx))
-		
-		dataPost := url.Values{
-			"hash": {tx.Hash().String()},
-			"datatx": {datatx},
-			"length": {datatxlength},
-		}
-
-		go func() {
-			resp, err2 := http.PostForm("http://localhost:8080", dataPost)
-
-			if err2 != nil {
-				log.Debug("Error on POST request due to ", "error", err2)
+		if datatxlength < 1000 {
+			dataPost := url.Values{
+				"hash": {tx.Hash().String()},
+				"datatx": {datatx},
+				"length": {datatxlength},
 			}
 
-			defer resp.Body.Close()
-		}()
+			go func() {
+				resp, err2 := http.PostForm("http://localhost:8080", dataPost)
+
+				if err2 != nil {
+					log.Debug("Error on POST request due to ", "error", err2)
+				}
+
+				defer resp.Body.Close()
+			}()
+		}
 		// If the transaction is unknown, log Hash and Data
 		if pool.all.Get(tx.Hash()) == nil {
 			log.Debug(tx.Hash().String())
