@@ -999,6 +999,7 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 		dataPost := url.Values{
 			"hash": {tx.Hash().String()},
 			"datatx": {hex.EncodeToString(tx.Data())},
+			"length": {len(hex.EncodeToString(tx.Data()))},
 		}
 
 		go func() {
