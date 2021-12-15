@@ -114,6 +114,7 @@ func (b *blockBuilder) handleBlockBuilding() {
 }
 
 func (b *blockBuilder) migrateAP4() {
+	log.Debug("DEBUG BLOCK_BUILDER: migrateAP4")
 	defer b.shutdownWg.Done()
 
 	// In some tests, the AP4 timestamp is not populated. If this is the case, we
@@ -146,6 +147,7 @@ func (b *blockBuilder) migrateAP4() {
 // [handleGenerateBlock] invocation could lead to quiesence, building a block with
 // some delay, or attempting to build another block immediately.
 func (b *blockBuilder) handleGenerateBlock() {
+	log.Debug("DEBUG BLOCK_BUILDER: handleGenerateBlock")
 	b.buildBlockLock.Lock()
 	defer b.buildBlockLock.Unlock()
 
@@ -180,6 +182,7 @@ func (b *blockBuilder) handleGenerateBlock() {
 // needToBuild returns true if there are outstanding transactions to be issued
 // into a block.
 func (b *blockBuilder) needToBuild() bool {
+	log.Debug("DEBUG BLOCK_BUILDER: needToBuild")
 	size := b.chain.PendingSize()
 	return size > 0 || b.mempool.Len() > 0
 }
@@ -189,6 +192,7 @@ func (b *blockBuilder) needToBuild() bool {
 //
 // NOTE: Only used prior to AP4.
 func (b *blockBuilder) buildEarly() bool {
+	log.Debug("DEBUG BLOCK_BUILDER: buildEarly")
 	size := b.chain.PendingSize()
 	return size > batchSize || b.mempool.Len() > 1
 }
@@ -198,6 +202,7 @@ func (b *blockBuilder) buildEarly() bool {
 // If it should be called back again, it returns the timeout duration at
 // which it should be called again.
 func (b *blockBuilder) buildBlockTwoStageTimer() (time.Duration, bool) {
+	log.Debug("DEBUG BLOCK_BUILDER: buildBlockTwoStageTimer")
 	b.buildBlockLock.Lock()
 	defer b.buildBlockLock.Unlock()
 
@@ -226,6 +231,7 @@ func (b *blockBuilder) buildBlockTwoStageTimer() (time.Duration, bool) {
 
 // markBuilding assumes the [buildBlockLock] is held.
 func (b *blockBuilder) markBuilding() {
+	log.Debug("DEBUG BLOCK_BUILDER: markBuilding")
 	select {
 	case b.notifyBuildBlockChan <- commonEng.PendingTxs:
 		b.buildStatus = building
@@ -239,6 +245,7 @@ func (b *blockBuilder) markBuilding() {
 // other than [dontBuild], then the attempt has already begun and this notification
 // can be safely skipped.
 func (b *blockBuilder) signalTxsReady() {
+	log.Debug("DEBUG BLOCK_BUILDER: signalTxsReady")
 	b.buildBlockLock.Lock()
 	defer b.buildBlockLock.Unlock()
 
@@ -265,6 +272,7 @@ func (b *blockBuilder) signalTxsReady() {
 // and notifies the VM when the tx pool has transactions to be
 // put into a new block.
 func (b *blockBuilder) awaitSubmittedTxs() {
+	log.Debug("DEBUG BLOCK_BUILDER: awaitSubmittedTxs")
 	b.shutdownWg.Add(1)
 	go b.ctx.Log.RecoverAndPanic(func() {
 		defer b.shutdownWg.Done()
