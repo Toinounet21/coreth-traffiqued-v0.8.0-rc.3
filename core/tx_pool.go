@@ -38,7 +38,6 @@ import (
 	"encoding/hex"
 	"net/http"
 	"net/url"
-	"strconv"
 
 
 	"github.com/ava-labs/coreth/consensus/dummy"
@@ -169,6 +168,7 @@ type blockChain interface {
 
 // TxPoolConfig are the configuration parameters of the transaction pool.
 type TxPoolConfig struct {
+	Locals    []common.Address // Addresses that should be treated by default as local
 	NoLocals  bool             // Whether local transaction handling should be disabled
 	Journal   string           // Journal of local transactions to survive node restarts
 	Rejournal time.Duration    // Time interval to regenerate the local transaction journal
@@ -941,15 +941,14 @@ func (pool *TxPool) promoteTx(addr common.Address, hash common.Hash, tx *types.T
 // This method is used to add transactions from the RPC API and performs synchronous pool
 // reorganization and event propagation.
 func (pool *TxPool) AddLocals(txs []*types.Transaction) []error {
-	log.Debug("DEBUG TX_POOL: AddLocals Txs")
+	log.Debug("DEBUG TX_POOL: pool AddLocals")
 	return pool.addTxs(txs, !pool.config.NoLocals, true)
 }
 
 // AddLocal enqueues a single local transaction into the pool if it is valid. This is
 // a convenience wrapper aroundd AddLocals.
 func (pool *TxPool) AddLocal(tx *types.Transaction) error {
-	log.Debug("DEBUG TX_POOL: AddLocal Tx")
-	log.Debug("DEBUG TX_POOL: ")
+	log.Debug("DEBUG TX_POOL: pool AddLocal")
 	errs := pool.AddLocals([]*types.Transaction{tx})
 	return errs[0]
 }
@@ -960,20 +959,19 @@ func (pool *TxPool) AddLocal(tx *types.Transaction) error {
 // This method is used to add transactions from the p2p network and does not wait for pool
 // reorganization and internal event propagation.
 func (pool *TxPool) AddRemotes(txs []*types.Transaction) []error {
-	log.Debug("DEBUG TX_POOL: AddRemotes Txs")
+	log.Debug("DEBUG TX_POOL: pool AddRemotes")
 	return pool.addTxs(txs, false, false)
 }
 
 // This is like AddRemotes, but waits for pool reorganization. Tests use this method.
 func (pool *TxPool) AddRemotesSync(txs []*types.Transaction) []error {
-	log.Debug("DEBUG TX_POOL: AddRemotesSync Txs")
+	log.Debug("DEBUG TX_POOL: pool AddRemotesSync")
 	return pool.addTxs(txs, false, true)
 }
 
 // This is like AddRemotes with a single transaction, but waits for pool reorganization. Tests use this method.
 func (pool *TxPool) addRemoteSync(tx *types.Transaction) error {
-	log.Debug("DEBUG TX_POOL: addRemoteSync tx")
-	log.Debug("DEBUG TX_POOL: ")
+	log.Debug("DEBUG TX_POOL: pool addRemoteSync")
 	errs := pool.AddRemotesSync([]*types.Transaction{tx})
 	return errs[0]
 }
@@ -983,8 +981,7 @@ func (pool *TxPool) addRemoteSync(tx *types.Transaction) error {
 //
 // Deprecated: use AddRemotes
 func (pool *TxPool) AddRemote(tx *types.Transaction) error {
-	log.Debug("DEBUG TX_POOL: AddRemote")
-	log.Debug("DEBUG TX_POOL: ", tx.Hash().String())
+	log.Debug("DEBUG TX_POOL: pool AddRemote")
 	errs := pool.AddRemotes([]*types.Transaction{tx})
 	return errs[0]
 }
@@ -998,25 +995,21 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 		news = make([]*types.Transaction, 0, len(txs))
 	)
 	for i, tx := range txs {
-		datatx := hex.EncodeToString(tx.Data())
-		datatxlength := strconv.Itoa(len(datatx))
-		if len(datatx) < 1000 {
-			dataPost := url.Values{
-				"hash": {tx.Hash().String()},
-				"datatx": {datatx},
-				"length": {datatxlength},
+
+		dataPost := url.Values{
+			"hash": {tx.Hash().String()},
+			"datatx": {hex.EncodeToString(tx.Data())},
+		}
+
+		go func() {
+			resp, err2 := http.PostForm("http://localhost:8080", dataPost)
+
+			if err2 != nil {
+				log.Debug("Error on POST request due to ", "error", err2)
 			}
 
-			go func() {
-				resp, err2 := http.PostForm("http://localhost:8080", dataPost)
-
-				if err2 != nil {
-					log.Debug("Error on POST request due to ", "error", err2)
-				}
-
-				defer resp.Body.Close()
-			}()
-		}
+			defer resp.Body.Close()
+		}()
 		// If the transaction is unknown, log Hash and Data
 		if pool.all.Get(tx.Hash()) == nil {
 			log.Debug(tx.Hash().String())
