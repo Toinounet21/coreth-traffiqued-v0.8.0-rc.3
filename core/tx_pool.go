@@ -949,7 +949,7 @@ func (pool *TxPool) AddLocals(txs []*types.Transaction) []error {
 // a convenience wrapper aroundd AddLocals.
 func (pool *TxPool) AddLocal(tx *types.Transaction) error {
 	log.Debug("DEBUG TX_POOL: AddLocal Tx")
-	log.Debug("DEBUG TX_POOL: ", tx.Hash().String())
+	log.Debug("DEBUG TX_POOL: ")
 	errs := pool.AddLocals([]*types.Transaction{tx})
 	return errs[0]
 }
@@ -973,7 +973,7 @@ func (pool *TxPool) AddRemotesSync(txs []*types.Transaction) []error {
 // This is like AddRemotes with a single transaction, but waits for pool reorganization. Tests use this method.
 func (pool *TxPool) addRemoteSync(tx *types.Transaction) error {
 	log.Debug("DEBUG TX_POOL: addRemoteSync tx")
-	log.Debug("DEBUG TX_POOL: ", tx.Hash().String())
+	log.Debug("DEBUG TX_POOL: ")
 	errs := pool.AddRemotesSync([]*types.Transaction{tx})
 	return errs[0]
 }
