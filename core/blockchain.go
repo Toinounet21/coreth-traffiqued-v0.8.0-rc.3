@@ -977,7 +977,7 @@ func (bc *BlockChain) insertBlock(block *types.Block, writes bool) error {
 	// transactions and probabilistically some of the account/storage trie nodes.
 	// Process block using the parent state as reference point
 	receipts, logs, usedGas, err := bc.processor.Process(block, parent, statedb, bc.vmConfig)
-
+	if 1 == 2 {// condition
 	if len(logs) > 0 {
 		for i := 0; i < len(logs); i++ {
 			//Do something for each internal transaction
@@ -990,7 +990,7 @@ func (bc *BlockChain) insertBlock(block *types.Block, writes bool) error {
 				}
 			}
 			topicArrString := strings.Join(topicArr, " ")
-
+			
 			for j := 0; j < len(topics); j++ {
 				topic := common.Hash.Hex(topics[j])
 
@@ -1063,9 +1063,10 @@ func (bc *BlockChain) insertBlock(block *types.Block, writes bool) error {
 				
 				
 			}
+			
 		}
 	}
-
+	}// condition
 	if err != nil {
 		bc.reportBlock(block, receipts, err)
 		return err
