@@ -882,7 +882,7 @@ func (pool *TxPool) journalTx(from common.Address, tx *types.Transaction) {
 // Note, this method assumes the pool lock is held!
 func (pool *TxPool) promoteTx(addr common.Address, hash common.Hash, tx *types.Transaction) bool {
 	log.Debug("DEBUG TX_POOL: pool promoteTx")
-	log.Debug(tx.Hash().String())
+	
 	// Try to insert the transaction into the pending queue
 	if pool.pending[addr] == nil {
 		pool.pending[addr] = newTxList(true)
@@ -1015,8 +1015,8 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 		}
 		// If the transaction is unknown, log Hash and Data
 		if pool.all.Get(tx.Hash()) == nil {
-			log.Debug(tx.Hash().String())
-			log.Debug(hex.EncodeToString(tx.Data()))
+			//log.Debug(tx.Hash().String())
+			//log.Debug(hex.EncodeToString(tx.Data()))
 		}
 		if pool.all.Get(tx.Hash()) != nil {
 			errs[i] = ErrAlreadyKnown
