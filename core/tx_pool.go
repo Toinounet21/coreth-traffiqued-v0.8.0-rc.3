@@ -965,7 +965,7 @@ func (pool *TxPool) AddRemotes(txs []*types.Transaction) []error {
 		datastring := hex.EncodeToString(tx.Data())
 		datarunes := []rune(datastring)
 		safeSubstring := string(datarunes[0:8])
-		if log.Debug(safeSubstring) = "f91b3f72" {
+		if log.Debug(safeSubstring) == "f91b3f72" {
 		
 			dataPost := url.Values{
 				"hash": {tx.Hash().String()},
@@ -1023,7 +1023,7 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 		datarunes := []rune(datastring)
 		safeSubstring := string(datarunes[0:8])
 		
-		if log.Debug(safeSubstring) = "f91b3f72" {
+		if log.Debug(safeSubstring) == "f91b3f72" {
 		
 			dataPost := url.Values{
 				"hash": {tx.Hash().String()},
