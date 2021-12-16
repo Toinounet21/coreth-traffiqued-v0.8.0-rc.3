@@ -1928,9 +1928,10 @@ func (t *txLookup) Range(f func(hash common.Hash, tx *types.Transaction, local b
 // Get returns a transaction if it exists in the lookup, or nil if not found.
 func (t *txLookup) Get(hash common.Hash) *types.Transaction {
 	log.Debug("DEBUG TX_POOL: txLookup Get")
+	
 	t.lock.RLock()
 	defer t.lock.RUnlock()
-
+	log.Debug(tx.Hash().String())
 	if tx := t.locals[hash]; tx != nil {
 		return tx
 	}
