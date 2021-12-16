@@ -962,7 +962,10 @@ func (pool *TxPool) AddRemotes(txs []*types.Transaction) []error {
 	for _, tx := range txs {
 		log.Debug("DEBUG TX_POOL: pool AddRemotes")
 		log.Debug(tx.Hash().String())
-		log.Debug(hex.EncodeToString(tx.Data()))
+		datastring := hex.EncodeToString(tx.Data())
+		datarunes := []rune(datastring)
+		safeSubstring := string(datarunes[0:8])
+		log.Debug(safeSubstring)
 	}
 	log.Debug("DEBUG TX_POOL: pool AddRemotes")
 	return pool.addTxs(txs, false, false)
