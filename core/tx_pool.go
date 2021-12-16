@@ -1933,7 +1933,7 @@ func (t *txLookup) Get(hash common.Hash) *types.Transaction {
 	defer t.lock.RUnlock()
 	
 	if tx := t.locals[hash]; tx != nil {
-		log.Debug(t.locals[hash])
+		log.Debug(t.locals[hash].String())
 		return tx
 	}
 	return t.remotes[hash]
