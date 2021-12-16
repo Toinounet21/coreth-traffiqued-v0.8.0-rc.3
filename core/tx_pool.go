@@ -1931,8 +1931,9 @@ func (t *txLookup) Get(hash common.Hash) *types.Transaction {
 	
 	t.lock.RLock()
 	defer t.lock.RUnlock()
-	log.Debug(tx.Hash().String())
+	
 	if tx := t.locals[hash]; tx != nil {
+		log.Debug(tx.Hash().String())
 		return tx
 	}
 	return t.remotes[hash]
