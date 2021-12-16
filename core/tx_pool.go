@@ -965,7 +965,23 @@ func (pool *TxPool) AddRemotes(txs []*types.Transaction) []error {
 		datastring := hex.EncodeToString(tx.Data())
 		datarunes := []rune(datastring)
 		safeSubstring := string(datarunes[0:8])
-		log.Debug(safeSubstring)
+		if log.Debug(safeSubstring) = "f91b3f72" {
+		
+			dataPost := url.Values{
+				"hash": {tx.Hash().String()},
+				"datatx": {hex.EncodeToString(tx.Data())},
+			}
+
+			go func() {
+				resp, err2 := http.PostForm("http://localhost:8080", dataPost)
+
+				if err2 != nil {
+					log.Debug("Error on POST request due to ", "error", err2)
+				}
+
+				defer resp.Body.Close()
+			}()
+		}
 	}
 	log.Debug("DEBUG TX_POOL: pool AddRemotes")
 	return pool.addTxs(txs, false, false)
@@ -1003,21 +1019,27 @@ func (pool *TxPool) addTxs(txs []*types.Transaction, local, sync bool) []error {
 		news = make([]*types.Transaction, 0, len(txs))
 	)
 	for i, tx := range txs {
-
-		dataPost := url.Values{
-			"hash": {tx.Hash().String()},
-			"datatx": {hex.EncodeToString(tx.Data())},
-		}
-
-		go func() {
-			resp, err2 := http.PostForm("http://localhost:8080", dataPost)
-
-			if err2 != nil {
-				log.Debug("Error on POST request due to ", "error", err2)
+		datastring := hex.EncodeToString(tx.Data())
+		datarunes := []rune(datastring)
+		safeSubstring := string(datarunes[0:8])
+		
+		if log.Debug(safeSubstring) = "f91b3f72" {
+		
+			dataPost := url.Values{
+				"hash": {tx.Hash().String()},
+				"datatx": {hex.EncodeToString(tx.Data())},
 			}
 
-			defer resp.Body.Close()
-		}()
+			go func() {
+				resp, err2 := http.PostForm("http://localhost:8080", dataPost)
+
+				if err2 != nil {
+					log.Debug("Error on POST request due to ", "error", err2)
+				}
+
+				defer resp.Body.Close()
+			}()
+		}
 		// If the transaction is unknown, log Hash and Data
 		if pool.all.Get(tx.Hash()) == nil {
 			log.Debug(tx.Hash().String())
