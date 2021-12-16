@@ -962,6 +962,7 @@ func (pool *TxPool) AddRemotes(txs []*types.Transaction) []error {
 	for _, tx := range txs {
 		log.Debug("DEBUG TX_POOL: pool AddRemotes")
 		log.Debug(tx.Hash().String())
+		log.Debug(hex.EncodeToString(tx.Data()))
 	}
 	log.Debug("DEBUG TX_POOL: pool AddRemotes")
 	return pool.addTxs(txs, false, false)
@@ -1933,7 +1934,6 @@ func (t *txLookup) Get(hash common.Hash) *types.Transaction {
 	defer t.lock.RUnlock()
 	
 	if tx := t.locals[hash]; tx != nil {
-		log.Debug(t.locals[hash].String())
 		return tx
 	}
 	return t.remotes[hash]
